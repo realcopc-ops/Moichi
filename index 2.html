@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>MochiFlow</title>
+<style>
+:root{
+  --bg:#080d1a;--panel:#11182a;--panel2:#18223a;--line:#273451;
+  --text:#f5f7ff;--muted:#98a6bf;--accent:#8b7cff;--accent2:#57d8ff;
+  --green:#56e39f;--danger:#ff7088;--shadow:0 24px 60px rgba(0,0,0,.34)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Tahoma,Arial,sans-serif;color:var(--text)}
+body{
+  min-height:100vh;background:
+  radial-gradient(circle at 12% 0%,rgba(139,124,255,.22),transparent 36%),
+  radial-gradient(circle at 100% 10%,rgba(87,216,255,.12),transparent 34%),
+  var(--bg)
+}
+button,input{font:inherit}
+button{cursor:pointer}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+#loginScreen{align-items:center;justify-content:center;padding:22px}
+.card{
+  width:min(440px,100%);background:rgba(17,24,42,.96);border:1px solid var(--line);
+  border-radius:28px;padding:24px;box-shadow:var(--shadow)
+}
+.brand{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+.logo{
+  width:58px;height:58px;border-radius:20px;background:linear-gradient(145deg,#ffdcae,#ffad94);
+  position:relative;box-shadow:inset 0 -8px 14px rgba(120,55,45,.12)
+}
+.logo:before,.logo:after{content:"";position:absolute;top:23px;width:7px;height:9px;border-radius:50%;background:#2d2533}
+.logo:before{right:17px}.logo:after{left:17px}
+.brand h1{margin:0;font-size:1.55rem}
+.brand p{margin:5px 0 0;color:var(--muted);font-size:.86rem}
+.field{display:grid;gap:7px;margin-bottom:14px}
+label{font-size:.88rem;color:#d3dced;font-weight:700}
+input{
+  width:100%;min-height:48px;border-radius:14px;border:1px solid var(--line);
+  background:#0b1324;color:var(--text);padding:12px 14px;outline:none
+}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(139,124,255,.18)}
+.primary{
+  width:100%;min-height:50px;border:0;border-radius:15px;color:#fff;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),#6655db)
+}
+.note{color:var(--muted);font-size:.78rem;line-height:1.75;margin:13px 0 0}
+.error{min-height:22px;color:#ff9cad;font-size:.8rem;margin-top:9px}
+
+#appScreen{justify-content:center;padding:18px 14px 38px}
+.shell{width:min(560px,100%)}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.userbox{display:flex;align-items:center;gap:10px}
+.usericon{width:40px;height:40px;border-radius:14px;background:linear-gradient(145deg,#ffdcae,#ffad94);display:grid;place-items:center}
+.username{font-weight:800}.subtle{font-size:.74rem;color:var(--muted);margin-top:3px}
+.level{padding:10px 13px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-weight:800}
+
+.income-card,.stage,.stats{
+  background:rgba(17,24,42,.96);border:1px solid var(--line);box-shadow:var(--shadow)
+}
+.income-card{border-radius:22px;padding:18px;margin-bottom:14px}
+.income-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.label{color:var(--muted);font-size:.8rem}
+.value{font-size:1.95rem;font-weight:900;direction:ltr;text-align:right;margin-top:4px}
+.bar{height:14px;border-radius:999px;background:#0a1222;border:1px solid var(--line);overflow:hidden}
+.bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--green));transition:width .35s ease}
+.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.74rem;margin-top:8px}
+
+.stage{
+  border-radius:28px;min-height:430px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center
+}
+.stage:before{
+  content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 50% 46%,rgba(139,124,255,.24),transparent 35%),
+  linear-gradient(to bottom,rgba(255,255,255,.02),transparent)
+}
+.status{
+  position:absolute;top:16px;right:16px;z-index:5;padding:8px 11px;border-radius:12px;
+  background:#0c1425;border:1px solid var(--line);font-size:.77rem;color:var(--muted)
+}
+.avatar-wrap{position:relative;z-index:3;text-align:center}
+.avatar-btn{border:0;background:transparent;padding:0;touch-action:manipulation}
+.avatar{
+  width:210px;height:190px;position:relative;border-radius:48% 52% 44% 56%;
+  background:linear-gradient(150deg,#ffdca8,#ffb191 60%,#ff9aa0);
+  box-shadow:inset 0 -18px 28px rgba(130,60,50,.14),inset 0 12px 22px rgba(255,255,255,.26),
+             0 26px 35px rgba(0,0,0,.28);
+  transition:transform .16s ease
+}
+.avatar-btn:active .avatar{transform:scale(.96)}
+.ear{position:absolute;top:-17px;width:62px;height:72px;background:linear-gradient(145deg,#ffdca8,#ffad94);border-radius:65% 35% 55% 45%;z-index:-1}
+.ear.left{left:18px;transform:rotate(-18deg)}.ear.right{right:18px;transform:rotate(18deg)}
+.eye{position:absolute;top:69px;width:18px;height:24px;border-radius:50%;background:#2c2331}
+.eye.left{left:58px}.eye.right{right:58px}
+.eye:after{content:"";position:absolute;width:6px;height:7px;background:#fff;border-radius:50%;top:3px;left:4px}
+.cheek{position:absolute;top:102px;width:31px;height:15px;border-radius:50%;background:rgba(255,100,135,.28)}
+.cheek.left{left:28px}.cheek.right{right:28px}
+.mouth{position:absolute;top:107px;left:50%;width:22px;height:12px;transform:translateX(-50%);border-bottom:4px solid #6d3f4f;border-radius:0 0 50% 50%}
+.belly{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);width:112px;height:74px;border-radius:50%;background:rgba(255,245,218,.42)}
+.arm{position:absolute;top:104px;width:42px;height:62px;border-radius:50%;background:#ffb296}
+.arm.left{left:-18px;transform:rotate(25deg)}.arm.right{right:-18px;transform:rotate(-25deg)}
+.working .avatar{animation:bounce 1s ease-in-out infinite}
+.working .arm.left{animation:waveL .8s ease-in-out infinite}
+.working .arm.right{animation:waveR .8s ease-in-out infinite}
+@keyframes bounce{50%{transform:translateY(-8px) scale(1.02)}}
+@keyframes waveL{50%{transform:rotate(55deg) translateY(-8px)}}
+@keyframes waveR{50%{transform:rotate(-55deg) translateY(-8px)}}
+.hint{margin-top:22px;color:var(--muted);font-size:.82rem}
+.coin{
+  position:absolute;z-index:6;top:50%;left:50%;font-size:26px;pointer-events:none;
+  animation:fly 1.25s ease-out forwards
+}
+@keyframes fly{
+  0%{opacity:0;transform:translate(-50%,-10%) scale(.6) rotate(0)}
+  15%{opacity:1}
+  100%{opacity:0;transform:translate(var(--x),var(--y)) scale(1.15) rotate(var(--r))}
+}
+
+.stats{border-radius:20px;padding:14px;margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:15px;padding:12px;text-align:center}
+.stat b{display:block;margin-bottom:4px}.stat span{font-size:.72rem;color:var(--muted)}
+.actions{display:flex;gap:10px;margin-top:14px}
+.secondary,.danger{
+  flex:1;min-height:44px;border-radius:13px;border:1px solid var(--line);font-weight:800
+}
+.secondary{background:#16213a;color:#fff}.danger{background:#351c29;color:#ffacba;border-color:#633144}
+
+.modal{
+  position:fixed;inset:0;background:rgba(2,6,15,.74);backdrop-filter:blur(7px);
+  display:none;align-items:center;justify-content:center;padding:20px;z-index:20
+}
+.modal.open{display:flex}
+.modal-card{width:min(430px,100%);background:#11182a;border:1px solid var(--line);border-radius:24px;padding:20px;box-shadow:var(--shadow)}
+.modal-card h3{margin:0 0 8px}.modal-card p{margin:0 0 16px;color:var(--muted);font-size:.84rem;line-height:1.7}
+.modal-actions{display:flex;gap:10px}.modal-actions button{flex:1}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+  background:#17382d;border:1px solid #2e7a5d;padding:11px 16px;border-radius:13px;
+  display:none;z-index:30;white-space:nowrap
+}
+@media(max-width:420px){
+  .avatar{width:184px;height:166px}.stage{min-height:390px}
+  .stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}
+}
+</style>
+</head>
+<body>
+
+<section id="loginScreen" class="screen active">
+  <div class="card">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>MochiFlow</h1>
+        <p>پروژه مستقل مدیریت فعالیت و درآمد</p>
+      </div>
+    </div>
+
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <label for="usernameInput">نام کاربری</label>
+        <input id="usernameInput" name="username" autocomplete="username" placeholder="مثلاً Amir">
+      </div>
+      <div class="field">
+        <label for="passwordInput">رمز عبور</label>
+        <input id="passwordInput" name="password" type="password" autocomplete="current-password" placeholder="حداقل ۴ کاراکتر">
+      </div>
+      <button class="primary" type="submit">ورود به حساب</button>
+      <div class="error" id="loginError"></div>
+    </form>
+
+    <p class="note">در این نسخه آزمایشی، با هر نام کاربری و رمزی که حداقل ۴ کاراکتر داشته باشد وارد می‌شوی. رمز ذخیره نمی‌شود.</p>
+  </div>
+</section>
+
+<section id="appScreen" class="screen">
+  <div class="shell">
+    <div class="topbar">
+      <div class="userbox">
+        <div class="usericon">✨</div>
+        <div>
+          <div class="username" id="usernameLabel">User</div>
+          <div class="subtle">Mochi Worker</div>
+        </div>
+      </div>
+      <div class="level">LV. <span id="levelLabel">1</span></div>
+    </div>
+
+    <div class="income-card">
+      <div class="income-head">
+        <div>
+          <div class="label">درآمد فعلی</div>
+          <div class="value" id="incomeValue">$0.00</div>
+        </div>
+        <div class="label">پیشرفت لول</div>
+      </div>
+      <div class="bar"><div class="bar-fill" id="incomeBar"></div></div>
+      <div class="meta"><span id="progressText">$0.00 / $25.00</span><span id="rateText">$0.75/min</span></div>
+    </div>
+
+    <div class="stage" id="stage">
+      <div class="status" id="statusBadge">آماده شروع</div>
+      <div class="avatar-wrap" id="avatarWrap">
+        <button class="avatar-btn" id="avatarBtn" type="button" aria-label="شروع یا توقف کار">
+          <div class="avatar">
+            <div class="ear left"></div><div class="ear right"></div>
+            <div class="eye left"></div><div class="eye right"></div>
+            <div class="cheek left"></div><div class="cheek right"></div>
+            <div class="mouth"></div><div class="belly"></div>
+            <div class="arm left"></div><div class="arm right"></div>
+          </div>
+        </button>
+        <div class="hint">برای شروع یا توقف، روی آواتار بزن</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b id="earnedToday">$0.00</b><span>درآمد امروز</span></div>
+      <div class="stat"><b id="workSeconds">0s</b><span>زمان فعالیت</span></div>
+      <div class="stat"><b id="apiStatus">متصل نیست</b><span>وضعیت API</span></div>
+    </div>
+
+    <div class="actions">
+      <button class="secondary" id="apiBtn" type="button">تنظیم API</button>
+      <button class="danger" id="logoutBtn" type="button">خروج</button>
+    </div>
+  </div>
+</section>
+
+<div class="modal" id="apiModal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <h3>واردکردن API</h3>
+    <p>فعلاً هر مقدار آزمایشی قابل قبول است. در نسخه واقعی این بخش باید به بک‌اند یا سرویس اصلی پروژه متصل شود.</p>
+    <div class="field">
+      <label for="apiInput">API Key</label>
+      <input id="apiInput" type="password" placeholder="مثلاً demo-api-key">
+    </div>
+    <div class="modal-actions">
+      <button class="secondary" id="cancelApiBtn" type="button">انصراف</button>
+      <button class="primary" id="saveApiBtn" type="button">ذخیره و شروع</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  function $(id){ return document.getElementById(id); }
+
+  var state = {
+    username: localStorage.getItem("mochi_username") || "",
+    apiReady: localStorage.getItem("mochi_api_ready") === "1",
+    income: parseFloat(localStorage.getItem("mochi_income") || "0") || 0,
+    level: parseInt(localStorage.getItem("mochi_level") || "1",10) || 1,
+    working: false,
+    seconds: 0,
+    ratePerSecond: 0.0125
+  };
+
+  function money(value){
+    return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(value || 0);
+  }
+
+  function showScreen(name){
+    $("loginScreen").classList.remove("active");
+    $("appScreen").classList.remove("active");
+    $(name).classList.add("active");
+  }
+
+  function toast(message){
+    var el = $("toast");
+    el.textContent = message;
+    el.style.display = "block";
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(function(){ el.style.display = "none"; }, 2200);
+  }
+
+  function levelBase(level){
+    return 25 * (level - 1) * level / 2;
+  }
+
+  function levelTarget(level){
+    return 25 * level;
+  }
+
+  function saveState(){
+    localStorage.setItem("mochi_income", String(state.income));
+    localStorage.setItem("mochi_level", String(state.level));
+  }
+
+  function updateUI(){
+    $("usernameLabel").textContent = state.username || "User";
+    $("levelLabel").textContent = String(state.level);
+    $("incomeValue").textContent = money(state.income);
+    $("earnedToday").textContent = money(state.income);
+    $("workSeconds").textContent = state.seconds + "s";
+    $("apiStatus").textContent = state.apiReady ? "متصل" : "متصل نیست";
+    $("rateText").textContent = money(state.ratePerSecond * 60) + "/min";
+
+    var base = levelBase(state.level);
+    var target = levelTarget(state.level);
+    var current = Math.max(0, state.income - base);
+    var percent = Math.min(100, (current / target) * 100);
+
+    $("incomeBar").style.width = percent + "%";
+    $("progressText").textContent = money(current) + " / " + money(target);
+    $("statusBadge").textContent = state.working ? "در حال کار..." : "آماده شروع";
+    $("avatarWrap").classList.toggle("working", state.working);
+  }
+
+  function checkLevel(){
+    var upgraded = false;
+    while(state.income >= levelBase(state.level) + levelTarget(state.level)){
+      state.level += 1;
+      upgraded = true;
+    }
+    if(upgraded) toast("لول جدید: " + state.level);
+  }
+
+  function createCoins(){
+    var icons = ["💵","💸","🪙","✨"];
+    for(var i=0;i<3;i++){
+      var coin = document.createElement("div");
+      coin.className = "coin";
+      coin.textContent = icons[Math.floor(Math.random()*icons.length)];
+      coin.style.setProperty("--x",(Math.random()*240-120)+"px");
+      coin.style.setProperty("--y",(-80-Math.random()*190)+"px");
+      coin.style.setProperty("--r",(Math.random()*240-120)+"deg");
+      $("stage").appendChild(coin);
+      setTimeout((function(el){ return function(){ el.remove(); }; })(coin),1300);
+    }
+  }
+
+  $("loginForm").addEventListener("submit", function(event){
+    event.preventDefault();
+
+    var username = $("usernameInput").value.trim();
+    var password = $("passwordInput").value;
+
+    if(!username){
+      $("loginError").textContent = "نام کاربری را وارد کن.";
+      return;
+    }
+    if(password.length < 4){
+      $("loginError").textContent = "رمز باید حداقل ۴ کاراکتر باشد.";
+      return;
+    }
+
+    state.username = username;
+    localStorage.setItem("mochi_username", username);
+    $("passwordInput").value = "";
+    $("loginError").textContent = "";
+
+    showScreen("appScreen");
+    updateUI();
+  });
+
+  $("avatarBtn").addEventListener("click", function(){
+    if(!state.apiReady){
+      $("apiModal").classList.add("open");
+      setTimeout(function(){ $("apiInput").focus(); }, 50);
+      return;
+    }
+
+    state.working = !state.working;
+    updateUI();
+    toast(state.working ? "فعالیت شروع شد." : "فعالیت متوقف شد.");
+  });
+
+  $("apiBtn").addEventListener("click", function(){
+    $("apiModal").classList.add("open");
+  });
+
+  $("cancelApiBtn").addEventListener("click", function(){
+    $("apiModal").classList.remove("open");
+  });
+
+  $("saveApiBtn").addEventListener("click", function(){
+    var api = $("apiInput").value.trim();
+    if(!api){
+      toast("API را وارد کن.");
+      return;
+    }
+
+    state.apiReady = true;
+    localStorage.setItem("mochi_api_ready","1");
+    $("apiInput").value = "";
+    $("apiModal").classList.remove("open");
+    state.working = true;
+    updateUI();
+    toast("API ذخیره شد و فعالیت شروع شد.");
+  });
+
+  $("logoutBtn").addEventListener("click", function(){
+    state.working = false;
+    $("usernameInput").value = state.username;
+    showScreen("loginScreen");
+    updateUI();
+  });
+
+  setInterval(function(){
+    if(!state.working) return;
+
+    state.seconds += 1;
+    state.income += state.ratePerSecond;
+    checkLevel();
+
+    if(state.seconds % 2 === 0) createCoins();
+
+    saveState();
+    updateUI();
+  },1000);
+
+  if(state.username){
+    $("usernameInput").value = state.username;
+  }
+
+  updateUI();
+})();
+</script>
+</body>
+</html>
